@@ -1,5 +1,5 @@
 from typing import Dict, Callable
-from contacts import PhoneBook
+from contacts import phone_book
 
 
 def input_error(func):
@@ -25,9 +25,9 @@ def handler_add(modifier: str) -> str:
     modifier_list = modifier.split(' ')
     if len(modifier_list) != 2:
         raise ValueError("Two parameters are required: name and phone number (separated by a space)")
-    PhoneBook.add_record(modifier_list[0])
-    PhoneBook[modifier_list[0]].add_phone(modifier_list[1])
-    return 'Record added to phonebook'
+    phone_book.add_record(modifier_list[0])
+    phone_book[modifier_list[0]].add_phone(modifier_list[1])
+    return 'Record added to phone book'
 
 
 @input_error
@@ -35,47 +35,48 @@ def handler_change(modifier: str) -> str:
     modifier_list = modifier.split(' ')
     if len(modifier_list) != 2:
         raise ValueError("Two parameters are required: name and phone number (separated by a space)")
-    if not (modifier_list[0] in PhoneBook):
+    if not (modifier_list[0] in phone_book):
         raise KeyError(f'Name {modifier_list[0]} not found in phone list')
-    PhoneBook[modifier_list[0]].change_phone(modifier_list[1])
-    return f'Record {modifier_list[0]} changed in phonebook'
+    phone_book[modifier_list[0]].change_phone(modifier_list[1])
+    return f'Record {modifier_list[0]} changed in phone book'
 
 
 @input_error
 def handler_delete(name: str) -> str:
-    if not (name in PhoneBook):
+    if not (name in phone_book):
         raise KeyError(f'Name {name} not found in phone list')
-    del PhoneBook[name]
+    del phone_book[name]
     return f'Record {name} deleted'
 
 
 @input_error
 def handler_phone(name: str) -> str:
-    if not (name in PhoneBook):
+    if not (name in phone_book):
         raise KeyError(f'Name {name} not found in phone list')
-    return PhoneBook[name].show_phone()
+    return phone_book[name].show_phone()
 
 
 @input_error
 def handler_find(find_text: str) -> str:
-    return PhoneBook.find_record(find_text)
+    return phone_book.find_record(find_text)
 
 
 @input_error
 def handler_del_phone(name: str) -> str:
-    if not (name in PhoneBook):
+    if not (name in phone_book):
         raise KeyError(f'Name {name} not found in phone list')
-    result = PhoneBook[name].delete_phone()
+    result = phone_book[name].delete_phone()
     return result
 
 
 @input_error
 def handler_show_all(*args) -> str:
-    if len(PhoneBook) == 0:
+    if len(phone_book) == 0:
         return 'Phone book is empty'
     result = ' {:^10} {:^15} '.format('Name', 'Number phone') + '\n'
     result = result + '-' * 28 + '\n'
-    phone_list = '\n'.join('|{:^10}|{:<15} '.format(name, ' ' + record.show_phone()) for name, record in PhoneBook.items())
+    phone_list = '\n'.join('|{:^10}|{:<15} '.format(name, ' ' + record.show_phone())
+                           for name, record in phone_book.items())
     result = result + phone_list + '\n' + '-' * 28
     return result
 

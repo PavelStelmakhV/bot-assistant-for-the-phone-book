@@ -67,4 +67,4 @@ class AddressBook(UserDict):
         return f'"{find_text}" matches not found'
 
 
-PhoneBook = AddressBook()
+phone_book = AddressBook()
