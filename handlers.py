@@ -1,5 +1,5 @@
 from typing import Dict, Callable
-from contacts import phone_book
+from contacts import *
 
 
 def input_error(func):
@@ -25,9 +25,31 @@ def handler_add(modifier: str) -> str:
     modifier_list = modifier.split(' ')
     if len(modifier_list) != 2:
         raise ValueError("Two parameters are required: name and phone number (separated by a space)")
-    phone_book.add_record(modifier_list[0])
-    phone_book[modifier_list[0]].add_phone(modifier_list[1])
-    return 'Record added to phone book'
+    if modifier_list[0] in phone_book:
+        phone_book[modifier_list[0]].add_phone(Phone(value=modifier_list[1]))
+        return f'Phone added to record {modifier_list[0]}'
+    else:
+        phone_book.add_record(name=Name(value=modifier_list[0]), phone=Phone(value=modifier_list[1]))
+        return 'Record added to phone book'
+
+
+@input_error
+def handler_birthday(modifier: str) -> str:
+    modifier_list = modifier.split(' ')
+    if len(modifier_list) != 2:
+        raise ValueError("Two parameters are required: name and birthday (separated by a space)")
+    if not (modifier_list[0] in phone_book):
+        raise KeyError(f'Name {modifier_list[0]} not found in phone list')
+    phone_book[modifier_list[0]].birthday = Birthday(value=modifier_list[1])
+    return f'Record {modifier_list[0]} changed in phone book'
+
+
+@input_error
+def handler_day_of_birthday(modifier: str) -> str:
+    modifier_list = modifier.split(' ')
+    if not (modifier_list[0] in phone_book):
+        raise KeyError(f'Name {modifier_list[0]} not found in phone list')
+    return f"{modifier_list[0]}'s birthday in {phone_book[modifier_list[0]].days_to_birthday()} days"
 
 
 @input_error
@@ -37,7 +59,7 @@ def handler_change(modifier: str) -> str:
         raise ValueError("Two parameters are required: name and phone number (separated by a space)")
     if not (modifier_list[0] in phone_book):
         raise KeyError(f'Name {modifier_list[0]} not found in phone list')
-    phone_book[modifier_list[0]].change_phone(modifier_list[1])
+    phone_book[modifier_list[0]].change_phone(Phone(value=modifier_list[1]))
     return f'Record {modifier_list[0]} changed in phone book'
 
 
@@ -73,11 +95,17 @@ def handler_del_phone(name: str) -> str:
 def handler_show_all(*args) -> str:
     if len(phone_book) == 0:
         return 'Phone book is empty'
-    result = ' {:^10} {:^15} '.format('Name', 'Number phone') + '\n'
-    result = result + '-' * 28 + '\n'
-    phone_list = '\n'.join('|{:^10}|{:<15} '.format(name, ' ' + record.show_phone())
-                           for name, record in phone_book.items())
-    result = result + phone_list + '\n' + '-' * 28
+
+    try:
+        max_line = int(args[0])
+    except ValueError:
+        max_line = len(phone_book)
+    result = 'Phone book:\n'
+    num_page = 0
+    for page in phone_book.iterator(max_line=max_line):
+        num_page += 1
+        result += f'<< page {num_page} >>\n' if max_line < len(phone_book) else ''
+        result += page
     return result
 
 
@@ -94,6 +122,8 @@ def handler_error(*args):
 handlers: Dict[str, Callable] = {
     'hello': handler_hello,
     'add': handler_add,
+    'birthday': handler_birthday,
+    'day of birthday': handler_day_of_birthday,
     'change': handler_change,
     'phone': handler_phone,
     'del': handler_delete,
