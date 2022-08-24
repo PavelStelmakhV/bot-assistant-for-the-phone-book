@@ -1,5 +1,9 @@
 from collections import UserDict
 from datetime import datetime, timedelta
+from pickle import load, dump
+
+
+FILE_NAME = 'data.bin'
 
 
 class Field:
@@ -18,7 +22,7 @@ class Field:
 
 
 class Birthday(Field):
-    def __init__(self, value):
+    def __init__(self, value: datetime):
         super().__init__(value)
 
     @Field.value.setter
@@ -99,6 +103,8 @@ class Record:
         return ' '.join([phone.value for phone in self.phone_list])
 
     def days_to_birthday(self) -> int:
+        if self.birthday is None:
+            return None
         birthday = self.birthday.value
         try:
             birthday_this_year = birthday.replace(year=datetime.now().year)
@@ -120,6 +126,7 @@ class AddressBook(UserDict):
         self.find_result = []
         self.max_line = max_line
         self.current_value = 0
+        self.load_book()
 
     def iterator(self, max_line: int = 5):
         result = ''
@@ -148,12 +155,18 @@ class AddressBook(UserDict):
             return f'Records where "{find_text}" were found: ' + ', '.join(self.find_result)
         return f'"{find_text}" matches not found'
 
+    def load_book(self):
+        try:
+            with open(FILE_NAME, 'rb') as fh:
+                self.data = load(fh)
+        except FileNotFoundError:
+            pass
+
+    def save_book(self):
+        with open(FILE_NAME, 'wb') as fh:
+            dump(self.data, fh)
+
 
 phone_book = AddressBook()
 
-# phone_book.add_record(name=Name(value='Misha'), phone=Phone(value='+380501234567'))
-# phone_book.add_record(name=Name(value='Sasha'), phone=Phone(value='+380903319035'))
-# phone_book.add_record(name=Name(value='Natasha'), phone=Phone(value='051111111'))
-# phone_book.add_record(name=Name(value='Lesya'))
-# phone_book.add_record(name=Name(value='Ira'), phone=Phone(value='052222222'))
-# phone_book.add_record(name=Name(value='Bob'), phone=Phone(value='+380904567891'))
+

@@ -111,12 +111,25 @@ def handler_show_all(*args) -> str:
 
 @input_error
 def handler_exit(*args):
+    phone_book.save_book()
     raise SystemExit('Good bye!')
 
 
 @input_error
 def handler_error(*args):
     return "Use one of the available commands: 'add', 'change', 'phone', 'show all', 'exit', 'good bye', 'close' or '.'"
+
+
+@input_error
+def handler_save(*args):
+    phone_book.save_book()
+    return 'Address book saved'
+
+
+@input_error
+def handler_load(*args):
+    phone_book.load_book()
+    return 'Address book loaded'
 
 
 handlers: Dict[str, Callable] = {
@@ -135,5 +148,7 @@ handlers: Dict[str, Callable] = {
     'exit': handler_exit,
     '.': handler_exit,
     'find': handler_find,
-    'error command': handler_error
+    'error command': handler_error,
+    'save': handler_save,
+    'load': handler_load
 }
